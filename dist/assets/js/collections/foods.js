@@ -1,0 +1,1 @@
+var app=app||{},Foods=Backbone.Collection.extend({model:app.Food,localStorage:new Backbone.LocalStorage("foods-backbone")});app.foods=new Foods([]);

@@ -33,7 +33,7 @@ app.SearchResultView = Backbone.View.extend({
 
     // the create will trigger an "add" event.
     // AppView listens for the add on the foods collection.
-    // It calls render, which runs the foodView, 
+    // It calls render, which runs the foodView,
     // which updates the DOM with the list of foods.
 
   }

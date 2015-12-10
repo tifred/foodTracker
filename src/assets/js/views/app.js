@@ -6,9 +6,11 @@ app.AppView = Backbone.View.extend({
 
   el: $('main'),
 
+  // Watch for user initiated events in the DOM.
+  // Call these methods, which will alter the model.
   events: {
-    'keypress #searchbar': 'addSearchResult',
-    'click #showMoreResults': 'addMoreSearchResults',
+    'keypress #searchbar': 'createSearchResults',
+    'click #showMoreResults': 'createMoreSearchResults',
     'click #saveDay': 'addSavedDay'
   },
 
@@ -19,14 +21,21 @@ app.AppView = Backbone.View.extend({
     this.foodtable = $('#foodtable');
     this.showMoreResults = $('#showMoreResults');
     this.lastSearchInput = '';
-    this.lastSearchRangeStart = 0;
+    this.rangeStart = 0;
+    this.rangeEnd = 3;
     this.saveDay = $('#saveDay');
     this.savedDayRow = $('.saved-days-row');
     this.savedDaysCount = 0;
+    this.useLastSearchInput = false;
 
+
+    // Listen for changes in the model.
+    // Call these methods, which will  alter the view accordingly:
     this.listenTo(app.foods, 'add', this.render);
     this.listenTo(app.foods, 'remove', this.render);
     this.listenTo(app.foods, 'reset', this.render);
+    this.listenTo(app.searchresults, 'add', this.addSearchResults);
+
     this.showMoreResults.hide();
     this.saveDay.hide();
   },
@@ -41,7 +50,7 @@ app.AppView = Backbone.View.extend({
     this.showMoreResults.hide();
     console.log(app.foods.length);
     if (app.foods.length > 0) {
-      console.log("in if"); 
+      console.log("in if");
       this.saveDay.show();
     } else {
       this.saveDay.hide();
@@ -60,65 +69,61 @@ app.AppView = Backbone.View.extend({
     self.foodtable.append('<tr id="table-total-row"><th>Total</th><th id="total">' + calCount + '</th></tr>');
   },
 
-  addSearchResult: function( event ) {
-    if ( event.which !== ENTER_KEY || !this.$searchbar.val().trim() ) {
-      return;
+  createSearchResults: function( event ) {
+
+    if (self.useLastSearchInput) {
+      var searchInput = self.lastSearchInput;
+    } else {
+      if ( event.which !== ENTER_KEY || !this.$searchbar.val().trim() ) {
+        return;
+      }
+      var searchInput = this.$searchbar.val().trim();
+      self.lastSearchInput = searchInput; // saved for more searches.
+      app.searchresults.reset();
     }
 
-    app.searchresults.reset();
-    self.$("#searchresultslist li").remove();
+    var range = '' + self.rangeStart + ':' + self.rangeEnd + '';
 
-    var searchInput = this.$searchbar.val().trim();
-    self.lastSearchInput = searchInput; // saved for more searches.
-
-    var nutQuery = 'https://api.nutritionix.com/v1_1/search/' + searchInput + '?results=0:3&fields=item_name%2Citem_id%2Cbrand_name%2Cnf_calories%2Cnf_total_fat&appId=c6f2c498&appKey=63a855793383d6e263e27c9993661a29'
+    var nutQuery = 'https://api.nutritionix.com/v1_1/search/' + searchInput + '?results=' + range + '&fields=item_name%2Citem_id%2Cbrand_name%2Cnf_calories%2Cnf_total_fat&appId=c6f2c498&appKey=63a855793383d6e263e27c9993661a29'
     $.getJSON(nutQuery)
       .done(function(data) {
-	for (var i = 0; i < data.hits.length; i++) {
+        for (var i = 0; i < data.hits.length; i++) {
           app.searchresults.create( {
-	    name: data.hits[i].fields.item_name,
-	    calories: Math.floor(data.hits[i].fields.nf_calories)
-          } );
-	};
-	app.searchresults.each(function(result) {
-	  var searchresultView = new app.SearchResultView({model: result});
-	  self.searchresultslist.append(searchresultView.render().el);
-	});
-        self.showMoreResults.show();
-    })
+            name: data.hits[i].fields.item_name,
+            calories: Math.floor(data.hits[i].fields.nf_calories)
+          });
+        };
+      })
       .fail(function() {
-	  self.searchresultslist.append('<div>Search Failed.</div>');
+          app.searchresults.create( {
+            name: "No results",
+            calories: 0
+          });
       });
 
     this.$searchbar.val('');
+    self.useLastSearchInput = false;
   },
 
-  addMoreSearchResults: function() {
-    var start = self.lastSearchRangeStart + 3;
-    var end = start + 3;
-    var range = '' + start + ':' + end + '';
+  // Add the search results to view.
+  // Add "Show More Matches" button too.
 
+  addSearchResults: function() {
     self.$("#searchresultslist li").remove();
 
-    var nutQuery = 'https://api.nutritionix.com/v1_1/search/' + self.lastSearchInput + '?results=' + range + '&fields=item_name%2Citem_id%2Cbrand_name%2Cnf_calories%2Cnf_total_fat&appId=c6f2c498&appKey=63a855793383d6e263e27c9993661a29'
-    $.getJSON(nutQuery)
-      .done(function(data) {
-	for (var i = 0; i < data.hits.length; i++) {
-          app.searchresults.create( {
-	    name: data.hits[i].fields.item_name,
-	    calories: Math.floor(data.hits[i].fields.nf_calories)
-          } );
-	};
-	app.searchresults.each(function(result) {
-	  var searchresultView = new app.SearchResultView({model: result});
-	  self.searchresultslist.append(searchresultView.render().el);
-	});
-        self.showMoreResults.show();
-        self.lastSearchRangeStart += 3;
-    })
-      .fail(function() {
-	  self.searchresultslist.append('<div>Search Failed.</div>');
-      });
+    app.searchresults.each(function(result) {
+      var searchresultView = new app.SearchResultView({model: result});
+      self.searchresultslist.append(searchresultView.render().el);
+    });
+
+    self.showMoreResults.show();
+  },
+
+  createMoreSearchResults: function() {
+    self.rangeStart += 3;
+    self.rangeEnd += 3;
+    self.useLastSearchInput = true;
+    this.createSearchResults();
   },
 
   addSavedDay: function() {

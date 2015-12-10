@@ -1,0 +1,1 @@
+var app=app||{};app.SearchResultView=Backbone.View.extend({tagName:"li",events:{"click div":"addFood"},initialize:function(){},render:function(){return this.$el.html("<div>"+this.model.get("name")+"</div>"),this},addFood:function(){app.searchresults.reset();var e=this.model.get("name"),a=this.model.get("calories");app.foods.create({name:e,calories:a})}});
