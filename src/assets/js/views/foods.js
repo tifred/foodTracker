@@ -22,7 +22,6 @@ app.FoodView = Backbone.View.extend({
   },
 
   showRemovePrompt: function() {
-    console.log("in showRemoveP");
     this.$el.find('.calories-data').text('Remove?');
   },
 
@@ -30,7 +29,7 @@ app.FoodView = Backbone.View.extend({
     this.$el.find('.calories-data').text('' + this.model.get("calories") + '');
   },
 
-  // AppView listens for the remove event and calls render
+  // AppView listens for the remove event and calls addAllFoods,
   // which updates the DOM, which removes the view of the food.
   removeFood: function() {
     app.foods.remove(this.model);

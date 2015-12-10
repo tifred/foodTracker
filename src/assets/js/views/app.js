@@ -31,41 +31,42 @@ app.AppView = Backbone.View.extend({
 
     // Listen for changes in the model.
     // Call these methods, which will  alter the view accordingly:
-    this.listenTo(app.foods, 'add', this.render);
-    this.listenTo(app.foods, 'remove', this.render);
-    this.listenTo(app.foods, 'reset', this.render);
+
     this.listenTo(app.searchresults, 'add', this.addSearchResults);
+    this.listenTo(app.foods, 'add', this.addFood);
+    this.listenTo(app.foods, 'add', this.clearSearchResults);
+    this.listenTo(app.foods, 'remove', this.addAllFoods); // rebuild view of foods.
+    this.listenTo(app.foods, 'reset', this.render);
+    this.listenTo(app.foods, 'update', this.render);
 
     this.showMoreResults.hide();
     this.saveDay.hide();
   },
 
   render: function() {
+   console.log("rendered run");
+//    self.$("#foodtable .table-data-food").remove();
+//    self.$("#foodtable #table-total-row").remove();
+//    app.searchresults.reset();
+//    self.$("#searchresultslist li").remove();
+// this.showMoreResults.hide();
 
-    console.log("rendered");
-    self.$("#foodtable .table-data-food").remove();
-    self.$("#foodtable #table-total-row").remove();
-    app.searchresults.reset();
-    self.$("#searchresultslist li").remove();
-    this.showMoreResults.hide();
-    console.log(app.foods.length);
     if (app.foods.length > 0) {
-      console.log("in if");
       this.saveDay.show();
+      this.addTotalCals();
     } else {
       this.saveDay.hide();
+      self.$("#foodtable #table-total-row").remove();
     }
-    this.lastSearchInput = '';
-    this.lastSearchRangeStart = 0;
+    
+  },
 
+  addTotalCals: function() {
     var calCount = 0;
-
     app.foods.each(function(food) {
       calCount += food.get('calories');
-      var foodView = new app.FoodView({model: food});
-      self.foodtable.append(foodView.render().el);
     });
-
+    self.$("#foodtable #table-total-row").remove();
     self.foodtable.append('<tr id="table-total-row"><th>Total</th><th id="total">' + calCount + '</th></tr>');
   },
 
@@ -79,6 +80,8 @@ app.AppView = Backbone.View.extend({
       }
       var searchInput = this.$searchbar.val().trim();
       self.lastSearchInput = searchInput; // saved for more searches.
+      self.rangeStart = 0;
+      self.rangeEnd = 3;
       app.searchresults.reset();
     }
 
@@ -124,6 +127,25 @@ app.AppView = Backbone.View.extend({
     self.rangeEnd += 3;
     self.useLastSearchInput = true;
     this.createSearchResults();
+  },
+
+  clearSearchResults: function() {
+    app.searchresults.reset(); 
+    self.$("#searchresultslist li").remove();
+    self.lastSearchInput = '';
+    self.rangeStart = 0;
+    self.rangeEnd = 3;
+    this.useLastSearchInput = false;
+  },
+  
+  addFood: function(food) {
+      var foodView = new app.FoodView({model: food});
+      self.foodtable.append(foodView.render().el);
+  },
+
+  addAllFoods: function() {
+    self.$("#foodtable .table-data-food").remove();
+    app.foods.each(this.addFood, this);
   },
 
   addSavedDay: function() {

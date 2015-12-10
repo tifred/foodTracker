@@ -6,7 +6,7 @@ app.SearchResultView = Backbone.View.extend({
   tagName: 'li',
 
   events: {
-    'click div': 'addFood'
+    'click div': 'createFood'
   },
 
   initialize: function() {
@@ -17,10 +17,7 @@ app.SearchResultView = Backbone.View.extend({
     return this;
   },
 
-  addFood: function() {
-
-    // Search results should vanish cause user clicked on one.
-    app.searchresults.reset();
+  createFood: function() {
 
     // create new model in Food collection.
     var name = this.model.get("name");
@@ -30,11 +27,14 @@ app.SearchResultView = Backbone.View.extend({
       name: name,
       calories: calories
     });
-
+ 
     // the create will trigger an "add" event.
     // AppView listens for the add on the foods collection.
     // It calls render, which runs the foodView,
     // which updates the DOM with the list of foods.
+
+    //  EXP:
+    app.searchresults.reset();
 
   }
 });
