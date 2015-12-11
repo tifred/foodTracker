@@ -58,11 +58,17 @@
 
     </div> <!-- END CONTAINER -->
 
+   <script type="text/template" id="search-result-template">
+     <div><%= name %></div>
+   </script>
+   <script type="text/template" id="food-template">
+     <td><%= name %></td>
+     <td class="calories-data"><%= calories %></td>
+   </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="assets/js/lib/underscore-min.js"></script>
     <script src="assets/js/lib/backbone-min.js"></script>
     <script src="assets/js/lib/bootstrap.min.js"></script>
-    <!-- script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script -->
     <!-- script src="https://cdn.firebase.com/js/client/2.3.2/firebase.js"></script -->
     <!-- script src="https://cdn.firebase.com/libs/backbonefire/0.5.1/backbonefire.min.js"></script -->
     <script src="assets/js/lib/backbone.localStorage.js"></script>

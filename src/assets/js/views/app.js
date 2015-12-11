@@ -36,6 +36,7 @@ app.AppView = Backbone.View.extend({
     this.listenTo(app.foods, 'add', this.addFood);
     this.listenTo(app.foods, 'add', this.clearSearchResults);
     this.listenTo(app.foods, 'remove', this.addAllFoods); // rebuild view of foods.
+    this.listenTo(app.foods, 'reset', this.addAllFoods);
     this.listenTo(app.foods, 'reset', this.render);
     this.listenTo(app.foods, 'update', this.render);
 
@@ -44,12 +45,6 @@ app.AppView = Backbone.View.extend({
   },
 
   render: function() {
-   console.log("rendered run");
-//    self.$("#foodtable .table-data-food").remove();
-//    self.$("#foodtable #table-total-row").remove();
-//    app.searchresults.reset();
-//    self.$("#searchresultslist li").remove();
-// this.showMoreResults.hide();
 
     if (app.foods.length > 0) {
       this.saveDay.show();
@@ -58,7 +53,6 @@ app.AppView = Backbone.View.extend({
       this.saveDay.hide();
       self.$("#foodtable #table-total-row").remove();
     }
-    
   },
 
   addTotalCals: function() {
@@ -136,6 +130,7 @@ app.AppView = Backbone.View.extend({
     self.rangeStart = 0;
     self.rangeEnd = 3;
     this.useLastSearchInput = false;
+    self.showMoreResults.hide();
   },
   
   addFood: function(food) {
