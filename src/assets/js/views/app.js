@@ -11,15 +11,17 @@ app.AppView = Backbone.View.extend({
   events: {
     'keypress #searchbar': 'createSearchResults',
     'click #showMoreResults': 'createMoreSearchResults',
-    'click #saveDay': 'addSavedDay'
+    'click #saveDay': 'createSavedDay'
   },
 
   initialize: function() {
     self = this;
     this.$searchbar = $('#searchbar');
     this.searchresultslist = $('#searchresultslist');
+    this.recentresultslist = $('#recentresultslist');
     this.foodtable = $('#foodtable');
     this.showMoreResults = $('#showMoreResults');
+    this.loadingResults = $('#loadingResults');
     this.lastSearchInput = '';
     this.rangeStart = 0;
     this.rangeEnd = 3;
@@ -39,9 +41,15 @@ app.AppView = Backbone.View.extend({
     this.listenTo(app.foods, 'reset', this.addAllFoods);
     this.listenTo(app.foods, 'reset', this.render);
     this.listenTo(app.foods, 'update', this.render);
+    this.listenTo(app.recentresults, 'add', this.addRecent);
+    this.listenTo(app.recentresults, 'add', this.clearSearchResults);
 
     this.showMoreResults.hide();
+    this.loadingResults.hide();
     this.saveDay.hide();
+ 
+    app.recentresults.fetch();
+    app.foods.fetch();
   },
 
   render: function() {
@@ -53,6 +61,7 @@ app.AppView = Backbone.View.extend({
       this.saveDay.hide();
       self.$("#foodtable #table-total-row").remove();
     }
+
   },
 
   addTotalCals: function() {
@@ -66,12 +75,14 @@ app.AppView = Backbone.View.extend({
 
   createSearchResults: function( event ) {
 
+
     if (self.useLastSearchInput) {
       var searchInput = self.lastSearchInput;
     } else {
       if ( event.which !== ENTER_KEY || !this.$searchbar.val().trim() ) {
         return;
       }
+      this.loadingResults.show();
       var searchInput = this.$searchbar.val().trim();
       self.lastSearchInput = searchInput; // saved for more searches.
       self.rangeStart = 0;
@@ -114,6 +125,7 @@ app.AppView = Backbone.View.extend({
     });
 
     self.showMoreResults.show();
+    self.loadingResults.hide();
   },
 
   createMoreSearchResults: function() {
@@ -132,6 +144,11 @@ app.AppView = Backbone.View.extend({
     this.useLastSearchInput = false;
     self.showMoreResults.hide();
   },
+
+  addRecent: function(result) {
+      var recentView = new app.RecentResultView({model: result});
+      self.recentresultslist.append(recentView.render().el);
+  },
   
   addFood: function(food) {
       var foodView = new app.FoodView({model: food});
@@ -143,29 +160,34 @@ app.AppView = Backbone.View.extend({
     app.foods.each(this.addFood, this);
   },
 
-  addSavedDay: function() {
-    self.savedDaysCount++;
-    app.foodsSavedDay = app.foods.clone();
-    var calCount = 0;
+  createSavedDay: function() {
+    app.allSavedDays = app.allSavedDays || [];
+    app.allSavedDays.push(app.foods.clone());
+   //  app.foods.reset();
+    this.addSavedDays();
+  },
 
-    if ( self.savedDaysCount % 4 === 1 && self.savedDaysCount > 1 ) {
-      self.savedDayRow.after('<section class="row saved-days-row"></section>');
-      self.savedDayRow = $('.saved-days-row:last');
+  addSavedDays: function() {
+    self.savedDayRow.find('div').remove();
+
+
+    for (var i = 0; i < app.allSavedDays.length; i++) {
+      var dayNum = i + 1;
+      var calCount = 0;
+      self.savedDayRow.append('<div class="col-xs-12 col-sm-6 col-md-3"><div>Day ' + dayNum + '</div><table class="table table-striped table-bordered table-condensed table-hover table-day' + dayNum + '"><tbody><tr><th>Food</th><th>Calories</th></tr>');
+      app.allSavedDays[i].each(function(food) {
+	calCount += food.get('calories');
+	var foodSavedDayView = new app.FoodSavedDayView({model: food});
+	$('.table-day' + dayNum + ' tbody').append(foodSavedDayView.render().el);
+      });
+
+      $('.table-day' + dayNum + ' tbody').append('<tr id="table-total-row"><th>Total</th><th id="total">' + calCount + '</th></tr>');
+
+      self.savedDayRow.append('</tbody></table></div>');
     }
-
-    self.savedDayRow.append('<div class="col-xs-12 col-sm-6 col-md-3"><div>Day ' + self.savedDaysCount + '</div><table class="table table-striped table-bordered table-condensed table-hover table-day' + self.savedDaysCount + '"><tbody><tr><th>Food</th><th>Calories</th></tr>');
-
-    app.foodsSavedDay.each(function(food) {
-      calCount += food.get('calories');
-      var foodSavedDayView = new app.FoodSavedDayView({model: food});
-      $('.table-day' + self.savedDaysCount + ' tbody').append(foodSavedDayView.render().el);
+    _.chain(app.foods.models).clone().each(function(model) {
+      model.destroy();
     });
 
-    $('.table-day' + self.savedDaysCount + ' tbody').append('<tr id="table-total-row"><th>Total</th><th id="total">' + calCount + '</th></tr>');
-
-    self.savedDayRow.append('</tbody></table></div>');
-
-    app.foodsSavedDay.reset();
-    app.foods.reset();
   }
 });

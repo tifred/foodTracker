@@ -1,0 +1,22 @@
+/*
+.header-row {
+  background-color: #d8a9a9;
+}
+*/
+
+.selection-box {
+  background-color: #63a2d8;
+}
+
+.recent-results-box {
+  background-color: #63a2d8;
+}
+
+.eaten-box {
+  background-color: #bddeb0; 
+}
+
+#recentresultslist li:hover, 
+#searchresultslist li:hover {
+  background-color: #bddeb0;
+}

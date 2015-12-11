@@ -1,22 +1,20 @@
-// js/views/searchresults.js
+// js/views/recentresults.js
 
 var app = app || {};
 
-app.SearchResultView = Backbone.View.extend({
+app.RecentResultView = Backbone.View.extend({
   tagName: 'li',
-  
-  template: _.template($('#search-result-template').html()),
+
+  template: _.template($('#recent-result-template').html()),
 
   events: {
-//    'click .search-result-data': 'createRecent',
-    'click .search-result-data': 'createFood'
+    'click div': 'createFood'
   },
 
   initialize: function() {
   },
 
   render: function() {
-    // this.$el.html('<div>' + this.model.get("name") + '</div>');
     this.$el.html(this.template(this.model.attributes));
     return this;
   },
@@ -31,10 +29,6 @@ app.SearchResultView = Backbone.View.extend({
       name: name,
       calories: calories
     });
-
-    app.recentresults.create({
-      name: name
-    });
  
     // the create will trigger an "add" event.
     // AppView listens for the add on the foods collection.
@@ -44,15 +38,5 @@ app.SearchResultView = Backbone.View.extend({
     // Not sure if this is the right place for this:
     app.searchresults.reset();
 
-  },
-
-  createRecent: function() {
-    
-    var name = this.model.get("name");
-
-    app.recentresults.create({
-      name: name
-    });
-    app.searchresults.reset();
   }
 });

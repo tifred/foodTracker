@@ -30,15 +30,27 @@
       <main class="row">
 
         <div class="col-xs-6">
-          <h4>Select Foods</h4>
-          <input id="searchbar" placeholder="Enter food" autofocus>
-          <button id="showMoreResults">Show More Matches</button>
-          <ul id="searchresultslist"></ul>
+          <div class="row selection-box"> 
+            <div class="col-xs-12">
+	      <h4>Select Foods</h4>
+	      <input id="searchbar" placeholder="Enter food" autofocus>
+	      <button id="showMoreResults">Show More</button>
+              <div id="loadingResults">Loading Results.....</div>
+	      <ul id="searchresultslist"></ul>
+            </div>
+          </div>
+
+          <div class="row recent-results-box"> 
+            <div class="col-xs-12">
+	      <h4>Recently Selected Foods</h4>
+	      <ul id="recentresultslist"></ul>
+            </div>
+          </div>
         </div>
 
-        <div class="col-xs-6">
+        <div class="col-xs-6 eaten-box">
           <h4>Eaten Today</h4>
-          <table class="table table-striped table-bordered table-condensed table-hover">
+          <table class="table table-bordered table-condensed table-hover">
             <tbody id="foodtable">
             </tbody>
           </table>
@@ -59,9 +71,16 @@
     </div> <!-- END CONTAINER -->
 
    <script type="text/template" id="search-result-template">
-     <div><%= name %></div>
+     <div class="search-result-data"><%= name %></div>
+   </script>
+   <script type="text/template" id="recent-result-template">
+     <div class="recent-result-data"><%= name %></div>
    </script>
    <script type="text/template" id="food-template">
+     <td><%= name %></td>
+     <td class="calories-data"><%= calories %></td>
+   </script>
+   <script type="text/template" id="saved-days-template">
      <td><%= name %></td>
      <td class="calories-data"><%= calories %></td>
    </script>
@@ -76,8 +95,10 @@
     <script src="assets/js/models/searchresult.js"></script>
     <script src="assets/js/collections/foods.js"></script>
     <script src="assets/js/collections/searchresults.js"></script>
+    <script src="assets/js/collections/recentresults.js"></script>
     <script src="assets/js/views/foods.js"></script>
     <script src="assets/js/views/searchresults.js"></script>
+    <script src="assets/js/views/recentresults.js"></script>
     <script src="assets/js/views/saveday.js"></script>
     <script src="assets/js/views/app.js"></script>
     <script src="assets/js/app.js"></script>
