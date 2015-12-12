@@ -8,20 +8,18 @@ app.SearchResultView = Backbone.View.extend({
   template: _.template($('#search-result-template').html()),
 
   events: {
-//    'click .search-result-data': 'createRecent',
-    'click .search-result-data': 'createFood'
+    'click .search-result-data': 'createFoodandRecentResults'
   },
 
   initialize: function() {
   },
 
   render: function() {
-    // this.$el.html('<div>' + this.model.get("name") + '</div>');
     this.$el.html(this.template(this.model.attributes));
     return this;
   },
 
-  createFood: function() {
+  createFoodandRecentResults: function() {
 
     // create new model in Food collection.
     var name = this.model.get("name");
@@ -36,23 +34,16 @@ app.SearchResultView = Backbone.View.extend({
       name: name
     });
  
-    // the create will trigger an "add" event.
-    // AppView listens for the add on the foods collection.
-    // It calls render, which runs the foodView,
-    // which updates the DOM with the list of foods.
+    /*
+        the create will trigger an "add" event.
+        AppView listens for the add on the foods collection.
+        It calls render, which runs the foodView,
+        which updates the DOM with the list of foods
+        and recent results.
+    */
 
     // Not sure if this is the right place for this:
     app.searchresults.reset();
 
-  },
-
-  createRecent: function() {
-    
-    var name = this.model.get("name");
-
-    app.recentresults.create({
-      name: name
-    });
-    app.searchresults.reset();
   }
 });

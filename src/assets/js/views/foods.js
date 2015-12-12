@@ -2,6 +2,11 @@
 
 var app = app || {};
 
+/*
+    app.FoodView: adds table data for each food.
+    Also handles three user events.
+*/
+
 app.FoodView = Backbone.View.extend({
   tagName: 'tr',
 
@@ -31,8 +36,11 @@ app.FoodView = Backbone.View.extend({
     this.$el.find('.calories-data').text('' + this.model.get("calories") + '');
   },
 
-  // AppView listens for the remove event and calls addAllFoods,
-  // which updates the DOM, which removes the view of the food.
+  /*
+      AppView listens for the remove event and calls addAllFoods,
+      which will rebuild the list of (remaining) foods.
+  */
+
   removeFood: function() {
     app.foods.remove(this.model);
   }
