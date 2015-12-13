@@ -2,74 +2,106 @@
 
 1. Load dist/index.html in a browser
 
-  * List of 10 locations should appear in list
-  * Map of 10 locations with 10 markers should appear
-  * Filter input field should read "Type Locations Here.."
-  * Locations that are parks will have green markers on the map
-  * Other locations will have red markers
+  * Four Headers should appear:
+  *   "Select Foods"
+  *   "Foods Eaten Today"
+  *   "Recently Selected Foods"
+  *   "Saved Days"
+  * Input search bar should appear below "Select Foods".
+  * Input search bar should have focus.
 
-2. Click on any marker on map
+  * Note: behavior many be different if page has been used before.
+  * Usage can save items to localStorage which are then loaded onto page.
+  * See "Persistence" below for expected behavior for saved data.
+  * Run "localStorage.clear()" in console to simulate a first page load.
 
-  * Marker should bounce for two seconds
-  * Info Window should open
-  * Info Window for neighborhoods should include three URL links and text from
-  * the New York Times's data API (the three most recent articles on this location)
-  * Info Window for parks should show link(s) to wikipedia
+2. Enter food into search bar and hit return.
 
-3. Click on link in Info Window
+  * Message of "Loading Results" should appear below search bar.
+  * Three results should appear in a list below search bar.
+  * "Loading Results" message should disappear.
+  * "Show More" button should appear.
 
-  * Should open URL in another tab in the browser
+3. Click on "Show More" button.
 
-4. Click on a marker while another marker is already bouncing
+  * Three more results for the food should appear with each click.
 
-  * The first marker should stop bouncing
-  * Only the most recently clicked marker should bounce
+4. Hover over food in results list.
 
-5. Click on a marker while another info Window is already open
+  * Background color should change to green.
 
-  * The info window of the first marker should disappear
+5. Click on food in results list.
 
-6. Hover over names of locations in list panel
+  * All foods should disappear from results list.
+  * "Show More" button should disappear.
+  * Selected food should appear in "Recently Selected Foods" list.
+  * Selected food should appear in "Foods Eaten Today" list.
+  * Food should list name and calorie in the table.
+  * Table should have a "total" line with total of all calories.
+  * "Save This Day" button should appear below food table.
+  * "Clear All Foods" button should appear below food table.
 
-  * The color of text and background should change
+6. Click on food in "Recently Selected Foods" list.
 
-7. Click on name of location in list
+  * Selected food should appear in "Foods Eaten Today" table.
+  * The total calories in food table should be updated to show new total.
 
-  * Marker should bounce
-  * Info Window should open
+7. Hover over food in food table.
 
-8. Enter text in Filter Input Field
+  * Background color should change to white.
+  * Number of calories should change to the text "Remove?"
 
-  * Text should be matched, in real time, letter by letter, against locations
-  * Matches are case insensitive and apply to all text, not just the start of a word
-  * For instance, typing "ho" should match the location "Soho"
-  * Matched location (only) should appear in list
-  * Matched marker (only) should appear on map
-  * InfoWindow should NOT open
-  * Marker should NOT bounce
+8. Click on "Remove?" text.
 
-9. Resize window to less than 768px in width
+  * Food should be removed from food table.
+  * Total in food table should be updated.
+  * If table now has no foods, the two buttons should disappear.
+  * If table now has no foods, "total" line in table should disappear.
 
-  * "Menu" icon should appear in top right corner
-  * Purple margin should appear around map image to allow for scrolling on mobile
-  * (otherwise, one could only scroll the map itself)
-  * In landscape mode on mobile, the height of map is reduced to fit better on the screen
+9. Click on "Clear All Foods" button.
 
-10. Click on "Menu" icon (only visible below 768 px)
+  * All foods should be removed from food table.
+  * The "Save This Day" and "Clear All Foods" buttons should disappear.
+  * The "total" line in table should disappear.
+  * Note: this prevents persistence upon page loads, which is a good thing.
 
-  * List view panel should disappear
-  * Click again and it should reappear
+10. Click on "Save This Day" button.
 
-11. Error Handling:
+  * Table should appear below "Saved Days" header.
+  * Table should be labeled "Day 1", "Day 2", etc.
+  * Table should contain list of foods, calories, and total calories.
+  * Tables should resize as viewport changes: from four across to one across.
 
-  * If the Google places library can't be reached, an alert window displays in browser
-  * If Google's service.textSearch doesn't respond, the map element displays an error
-  * If the New York Times API doesn't respond, the InfoWindow displays an error
-  * If the Wikipedia API doesn't respond, the InfoWindow displays an error
-  * If the submit on Input Filter Field has no matches, the list view panel shows an error
+12. Data Persistence.
 
-12. Build Environment:
+  * Recently Selected Foods should persist upon page reload.
+  * Foods table should persist upon page reload.
+  * Clicking on "Remove?" or "Clear All Foods" should prevent persistence.
+  * Saved Days should not persist upon reload (undesireable, but expected for now).
+
+11. Error Handling.
+
+  * If server cannot be reached, should display "Failed To Reach API Server".
+  * Test by inserting "XYXY" into url: https://api.nutritionix.com/
+  * (found at line 154 in views/app.js).
+
+  * If server cannot find a match, should display "No Matching Foods Were Found".
+  * Test by typing in "foobar" in search bar and hitting return.
+
+12. Build Environment.
 
   * Unzip nodes.modules.zip
   * Run "gulp build"
   * This will minimize relevant files in src/ and put the results in dist/
+
+14. Known Problems.
+
+  * The Saved Days do not persist upon page reload.
+  * The implementation of Saved Days is poor and needs to be redone.
+
+  * If Save This Day is used once, then "Clear All Foods", then foods
+  * are added, and then "Save This Day" is used again, all but the last
+  * saved day will have no table data rows.
+
+  * Upon clicking "Save This Day", the actions done by "Clear All Foods"
+  * should happen automatically.  Ran into problems implementing that.
