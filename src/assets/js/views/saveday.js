@@ -2,6 +2,11 @@
 
 var app = app || {};
 
+/*
+    app.FoodSavedDayView: adds table data for foods to a "saved day".
+    This is a hack of an implementation, I know.
+*/
+
 app.FoodSavedDayView = Backbone.View.extend({
   tagName: 'tr',
 

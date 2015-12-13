@@ -2,6 +2,13 @@
 
 var app = app || {};
 
+/*
+    app.RecentResultView: adds list data for recent results.
+    Also handles clicks, which add selected food to the list.
+    app.FoodView does that too, but it also adds to the recent results,
+    which would be redundant in this case.
+*/
+
 app.RecentResultView = Backbone.View.extend({
   tagName: 'li',
 
@@ -21,7 +28,14 @@ app.RecentResultView = Backbone.View.extend({
 
   createFood: function() {
 
-    // create new model in Food collection.
+    /*
+        Create new model in foods collection.
+        The create will trigger an "add" event.
+        AppView has a "listenTo" that listens
+        for the add on the collection
+        and calls a method to "add" to the DOM.
+    */
+
     var name = this.model.get("name");
     var calories = this.model.get("calories");
 
@@ -29,14 +43,5 @@ app.RecentResultView = Backbone.View.extend({
       name: name,
       calories: calories
     });
- 
-    // the create will trigger an "add" event.
-    // AppView listens for the add on the foods collection.
-    // It calls render, which runs the foodView,
-    // which updates the DOM with the list of foods.
-
-    // Not sure if this is the right place for this:
-    app.searchresults.reset();
-
   }
 });

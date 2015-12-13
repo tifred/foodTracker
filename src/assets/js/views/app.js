@@ -14,7 +14,8 @@ app.AppView = Backbone.View.extend({
   events: {
     'keypress #searchbar': 'createSearchResults',
     'click #showMoreResults': 'createMoreSearchResults',
-    'click #saveDay': 'createSavedDay'
+    'click #saveDay': 'createSavedDay',
+    'click #clearFoods': 'foodsDestroy'
   },
 
   initialize: function() {
@@ -28,73 +29,77 @@ app.AppView = Backbone.View.extend({
     this.$saveDay = $('#saveDay');
     this.$savedDayRow = $('.saved-days-row');
     this.savedDaysCount = 0;
+    this.$clearFoods = $('#clearFoods');
 
-    // needed to make the "show more" searches button work.
+    // Variables used to make the "Show More" searches button work.
     this.rangeStart = 0;
     this.rangeEnd = 3;
     this.lastSearchInput = '';
     this.useLastSearchInput = false;
 
-    /* 
+    /*
         Listen for changes in collections of models.
         Call these methods, which will alter the view.
-        The "add", as in "addSearchResults", means to add to the DOM.
+        The word "add", as in "addSearchResults", means to add to the DOM.
     */
 
-    // when we have new searchresults, add them all to the DOM.
+    // When there are new searchresults, add them all to the DOM.
     this.listenTo(app.searchresults, 'add', this.addSearchResults);
 
-    // adding one food is just an addition to the model.
+    // When adding one food only, make one simple addition to collection.
     this.listenTo(app.foods, 'add', this.addFood);
 
-    // always clear the search results after adding food to the list.
+    // When adding a food, clear search results in collection and DOM.
     this.listenTo(app.foods, 'add', this.clearSearchResults);
 
-    // when a food is removed, remove all foods and add remaining ones again.
-    this.listenTo(app.foods, 'remove', this.addAllFoods);
-
-    // junk?
-    this.listenTo(app.foods, 'reset', this.addAllFoods);
-
-    // render on reset and update to recalc total cals and show/hide save button.
-    this.listenTo(app.foods, 'reset', this.render);
-    this.listenTo(app.foods, 'update', this.render);
-
-    // if we have recent results, add them to the DOM:
+    // When there are new recent results, add them to the DOM.
     this.listenTo(app.recentresults, 'add', this.addRecent);
 
-    // junk?  I don't see any effect with it gone, but...
-    // this.listenTo(app.recentresults, 'add', this.clearSearchResults);
+    // When a food is removed, remove all and add remaining foods to DOM again.
+    this.listenTo(app.foods, 'remove', this.RemoveAndAddAllFoods);
 
-    // Hide all three of these elements at first.
+    // When there is an update (e.g. a remove or an add), run render.
+    this.listenTo(app.foods, 'update', this.render);
+
+    // When a day is saved, update the DOM with addSavedDays.
+    this.listenTo(app.foods, 'saveTheDay', this.addSavedDays);
+
+    // Hide these elements at first.
     this.showMoreResults.hide();
     this.loadingResults.hide();
     this.$saveDay.hide();
- 
-    // retrieve from localstorage upon load.
+    this.$clearFoods.hide();
+
+    /* 
+       Retrieve from localstorage upon load.
+       Recent results are always preserved.
+       Foods are preseved until the "Clear All Foods" button is clicked.
+       Saved days are never preserved (which is bad!)
+    */
     app.recentresults.fetch();
     app.foods.fetch();
   },
 
   render: function() {
-
     /*
-        If there are any foods to show, 
+        If there are any foods to show in table,
         display the calories total in the table
         and show the "Save This Day" button.
-    */ 
+    */
 
     if (app.foods.length > 0) {
       this.$saveDay.show();
+      this.$clearFoods.show();
       this.addTotalCals();
     } else {
       this.$saveDay.hide();
+      this.$clearFoods.hide();
       self.$("#foodtable #table-total-row").remove();
     }
 
   },
 
-  /* Let the Methods Begin */
+  /***** Let the Methods Begin *****/
 
   addTotalCals: function() {
     var calCount = 0;
@@ -107,30 +112,32 @@ app.AppView = Backbone.View.extend({
 
   createSearchResults: function( event ) {
 
-    /* An initial search will get three items from the API's url.
-       Hitting the "Show More" button will get the next three items.
-       "useLastSearchInput" signifies whether this is an initial 
-       search or a "Show More" search.
+    /* 
+        An initial search will get three items from the API's url.
+        Hitting the "Show More" button will get the next three items.
+        The boolean "useLastSearchInput" signifies whether this is an initial
+        search or a "Show More" search.
     */
-       
+
     if (self.useLastSearchInput) {
-      // The "Show More" button was used, so use last input value.
+      // If the "Show More" button was used, use last input value.
       var searchInput = self.lastSearchInput;
+      // Otherwise, do all this:
     } else {
-      // if the enter key was not hit or there is no value, do nothing.
+      // If the enter key was not hit or there is no value, do nothing.
       if ( event.which !== ENTER_KEY || !this.$searchbar.val().trim() ) {
         return;
       }
-      // otherwise, do something with the current input:
-      this.loadingResults.show(); // show "loading" while results come back.
+      // Otherwise, do something with the current input:
+      this.loadingResults.show(); // Show "loading" while results come back.
       var searchInput = this.$searchbar.val().trim();
-      self.lastSearchInput = searchInput; // save input for more searches.
+      self.lastSearchInput = searchInput; // Save input for more searches.
       self.rangeStart = 0;
       self.rangeEnd = 3;
-      app.searchresults.reset(); // clear out old searchresults.
+      app.searchresults.reset(); // Clear out old searchresults.
     }
 
-    // set range to e.g. 0:3 , 3:6 , etc.
+    // Set range: e.g. 0:3 , 3:6 , etc.
     var range = '' + self.rangeStart + ':' + self.rangeEnd + '';
 
     /*
@@ -138,12 +145,23 @@ app.AppView = Backbone.View.extend({
         This happens for both an initial search and a "Show More".
         Results will be in "data.hits[i]."
         Create new models in the searchresults collection.
-        Upon failure, put an error in the searchresults collection.
+
+        If server cannot be reached, display "Failed To Reach API Server".
+        If server cannot find a match, display "No Matching Foods Were Found".
+        Failure messages go into the searchresults collection.
     */
 
     var nutQuery = 'https://api.nutritionix.com/v1_1/search/' + searchInput + '?results=' + range + '&fields=item_name%2Citem_id%2Cbrand_name%2Cnf_calories%2Cnf_total_fat&appId=c6f2c498&appKey=63a855793383d6e263e27c9993661a29'
+
     $.getJSON(nutQuery)
       .done(function(data) {
+        // data.hits array will be empty if no matches are found.
+        if ( data.hits.length === 0) {
+	  app.searchresults.create( {
+	    name: "No Matching Foods Were Found",
+	    calories: 0
+	  });
+        }
         for (var i = 0; i < data.hits.length; i++) {
           app.searchresults.create( {
             name: data.hits[i].fields.item_name,
@@ -152,15 +170,16 @@ app.AppView = Backbone.View.extend({
         };
       })
       .fail(function() {
-          app.searchresults.create( {
-            name: "No results",
-            calories: 0
-          });
+        app.searchresults.create( {
+          name: "Could Not Reach Server With Food Information",
+          calories: 0
+        });
       });
 
     /*
-        Clearing these out allows another search to be run
-        without actually selecting a food.
+        Clear out two variables.
+        Clearing these out handles the case where another search
+        is run BEFORE selecting a food from the list.
         When a food is selected, the more extensive "clearSearchResults" runs.
     */
 
@@ -170,14 +189,14 @@ app.AppView = Backbone.View.extend({
 
   /*
       addSearchResults: Add the search results to the DOM.
-      Add "Show More Matches" button too.
+      Makes "Show More Matches" button visible.
   */
 
   addSearchResults: function() {
-    // remove all the li elements that held old search results.
+    // Remove all the li elements that held old search results.
     self.$("#searchresultslist li").remove();
 
-    // loop through searchresults coll and add li's to the ul.
+    // Loop through searchresults collection and add li's to the ul.
     app.searchresults.each(function(result) {
       var searchresultView = new app.SearchResultView({model: result});
       self.$searchresultslist.append(searchresultView.render().el);
@@ -191,8 +210,8 @@ app.AppView = Backbone.View.extend({
 
   /*
       createMoreSearchResults: run when "Show More" button is clicked.
-      Increase the range, set the "signal" variable to true.
-      Then run createSearchResults method (should I use a trigger instead?)
+      Increase the range, set the useLastSearchInput variable to true.
+      Then run createSearchResults method (should I use a custom trigger instead?)
   */
 
   createMoreSearchResults: function() {
@@ -202,10 +221,14 @@ app.AppView = Backbone.View.extend({
     this.createSearchResults();
   },
 
-  // This is run when an item is selected from searchresults.
+  /*
+      clearSearchResults: clears results from DOM and collection.
+      Also resets some key variables.    
+      This is run when an item is selected from searchresults.
+  */
 
   clearSearchResults: function() {
-    app.searchresults.reset(); 
+    app.searchresults.reset();
     self.$("#searchresultslist li").remove();
     self.lastSearchInput = '';
     self.rangeStart = 0;
@@ -214,10 +237,11 @@ app.AppView = Backbone.View.extend({
     self.showMoreResults.hide();
   },
 
-  /* 
+  /*
       addRecent: Adds recent results to DOM.
       The models in this collection are created when a user
-      clicks on a search result.  See the "createFoodandRecentResults" method
+      clicks on a search result.  
+      It happens in the "createFoodandRecentResults" method
       in the SearchResultView constructor/view.
   */
 
@@ -225,12 +249,12 @@ app.AppView = Backbone.View.extend({
       var recentView = new app.RecentResultView({model: result});
       self.$recentresultslist.append(recentView.render().el);
   },
-  
 
-  /* 
+  /*
       addFood: Adds one new food to the table in the DOM.
       The models in this collection are created when a user
-      clicks on a search result.  See the "createFoodandRecentResults" method
+      clicks on a search result.  
+      It happens in the "createFoodandRecentResults" method
       in the SearchResultView constructor/view.
   */
 
@@ -240,37 +264,38 @@ app.AppView = Backbone.View.extend({
   },
 
   /*
-      addAllFoods: Removes all foods from DOM; builds list again from scratch.
+      RemoveAndAddAllFoods: Removes all foods from DOM.
+      Builds table in DOM again from scratch.
       Used when a single food is removed by the user.
   */
 
-  addAllFoods: function() {
+  RemoveAndAddAllFoods: function() {
     self.$("#foodtable .table-data-food").remove();
     app.foods.each(this.addFood, this);
   },
 
-  /* 
+  /*
       NOTE: THE FOLLOWING IS A HACK.
 
       There has to be a better way to save days, using collections.
-      I think I need a collection inside a collection.
+      I think I need a collection inside a collection, but don't know how.
       Ideas?
   */
 
   /*
-      Push current "food" collection onto an array.
-      Then run 'addSavedDays' to add to DOM (bad method too.)
+      createSavedDay: Push clone of current "food" collection onto an array.
+      Then trigger "saveTheDay", which will call addSavedDays.
   */
 
   createSavedDay: function() {
     app.allSavedDays = app.allSavedDays || [];
     app.allSavedDays.push(app.foods.clone());
-    app.foods.reset();
-    this.addSavedDays();
+    app.foods.trigger('saveTheDay');
   },
 
-  /* 
+  /*
       addSavedDays: Add a table for each Saved Day.
+      This is ugly!
       What is the right way to do this?
   */
 
@@ -291,13 +316,17 @@ app.AppView = Backbone.View.extend({
 
       self.$savedDayRow.append('</tbody></table></div>');
     }
+  },
 
-    // Save method to remove all models from foods collection.
-
-    /* Bad side effects...
-    _.chain(app.foods.models).clone().each(function(model) {
-      model.destroy();
-    });
-    */
+  /* 
+      foodsDestroy: run by click on "Clear All Foods" button.
+      Effectively removes foods from collection and from localStorage.
+      Triggers a "remove" event, which will run RemoveAndAddAllFoods.
+  */
+     
+  foodsDestroy: function() {
+     while (app.foods.models.length > 0) {
+       app.foods.at(0).destroy();
+     }  
   }
 });

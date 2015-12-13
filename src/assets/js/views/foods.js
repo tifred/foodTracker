@@ -3,7 +3,7 @@
 var app = app || {};
 
 /*
-    app.FoodView: adds table data for each food.
+    app.FoodView: generates table row for each food.
     Also handles three user events.
 */
 
@@ -17,7 +17,7 @@ app.FoodView = Backbone.View.extend({
   events: {
     'mouseover .calories-data': 'showRemovePrompt',
     'mouseleave .calories-data': 'hideRemovePrompt',
-    'click .calories-data': 'removeFood'
+    'click .calories-data': 'destroyFood'
   },
 
   initialize: function() {
@@ -37,11 +37,13 @@ app.FoodView = Backbone.View.extend({
   },
 
   /*
-      AppView listens for the remove event and calls addAllFoods,
+      destroyFood: destroys a single food item when user clicks on "Remove?"
+      This removes it from localStorage and generates a "remove" event.
+      AppView listens for a remove event and calls RemoveAndAddAllFoods,
       which will rebuild the list of (remaining) foods.
   */
 
-  removeFood: function() {
-    app.foods.remove(this.model);
+  destroyFood: function() {
+    this.model.destroy();
   }
 });

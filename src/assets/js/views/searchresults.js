@@ -2,9 +2,16 @@
 
 var app = app || {};
 
+/*
+    app.SearchResultView: adds list data for each search result.
+    Also handles clicks on each result, which will
+      a) add a food to food table.
+      b) add to the recent results list.
+*/
+
 app.SearchResultView = Backbone.View.extend({
   tagName: 'li',
-  
+
   template: _.template($('#search-result-template').html()),
 
   events: {
@@ -21,7 +28,13 @@ app.SearchResultView = Backbone.View.extend({
 
   createFoodandRecentResults: function() {
 
-    // create new model in Food collection.
+    /*
+        Create new model in foods collection and recentresults collection.
+        The create will trigger an "add" event.
+        AppView has "listenTo"s that listen for the add on the two collections
+        and call methods to "add" to the DOM.
+    */
+
     var name = this.model.get("name");
     var calories = this.model.get("calories");
 
@@ -33,17 +46,5 @@ app.SearchResultView = Backbone.View.extend({
     app.recentresults.create({
       name: name
     });
- 
-    /*
-        the create will trigger an "add" event.
-        AppView listens for the add on the foods collection.
-        It calls render, which runs the foodView,
-        which updates the DOM with the list of foods
-        and recent results.
-    */
-
-    // Not sure if this is the right place for this:
-    app.searchresults.reset();
-
   }
 });

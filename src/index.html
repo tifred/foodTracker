@@ -52,30 +52,33 @@
         <!-- EATEN TODAY -->
 
         <div class="col-xs-6 eaten-box">
-          <h4>Eaten Today</h4>
+          <h4>Foods Eaten Today</h4>
           <table class="table table-bordered table-condensed table-hover">
             <tbody id="foodtable">
             </tbody>
           </table>
           <button id="saveDay">Save This Day</button>
-        </div>
-
-        <!-- SAVED DAYS -->
-
-        <div class="row">
-          <div class="col-xs-12">
-            <h4>Saved Days</h4>
-          </div>
-        </div>
-
-
-        <div class="row saved-days-row">
+          <button id="clearFoods">Clear All Foods</button>
         </div>
 
       </main>  <!-- END MAIN -->
 
+      <!-- SAVED DAYS -->
+
+      <div class="row">
+	<div class="col-xs-12">
+	  <h4>Saved Days</h4>
+	</div>
+      </div>
+
+      <div class="row saved-days-row"
+        <div class="col-xs-12">
+        </div>
+      </div>
+
     </div> <!-- END CONTAINER -->
 
+    <!-- template used in js/views/searchresults.js, app.SearchResultView -->
     <script type="text/template" id="search-result-template">
       <div class="search-result-data"><%= name %></div>
     </script>
@@ -91,16 +94,20 @@
       <td class="calories-data"><%= calories %></td>
     </script>
 
+    <!-- template used in js/views/saveday.js, app.FoodSavedDayView -->
     <script type="text/template" id="saved-days-template">
       <td><%= name %></td>
       <td class="calories-data"><%= calories %></td>
     </script>
 
+    <!-- Libraries -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="assets/js/lib/underscore-min.js"></script>
     <script src="assets/js/lib/backbone-min.js"></script>
     <script src="assets/js/lib/bootstrap.min.js"></script>
     <script src="assets/js/lib/backbone.localStorage.js"></script>
+
+    <!-- Local JavaScript Files -->
     <script src="assets/js/models/food.js"></script>
     <script src="assets/js/models/searchresult.js"></script>
     <script src="assets/js/collections/foods.js"></script>
