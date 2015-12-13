@@ -44,7 +44,8 @@ app.SearchResultView = Backbone.View.extend({
     });
 
     app.recentresults.create({
-      name: name
+      name: name,
+      calories: calories
     });
   }
 });
