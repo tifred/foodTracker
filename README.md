@@ -3,14 +3,13 @@
 1. Load dist/index.html in a browser
 
   * Four Headers should appear:
-  *   "Select Foods"
-  *   "Foods Eaten Today"
-  *   "Recently Selected Foods"
-  *   "Saved Days"
+  * "Select Foods"
+  * "Foods Eaten Today"
+  * "Recently Selected Foods"
+  * "Saved Days"
   * Input search bar should appear below "Select Foods".
   * Input search bar should have focus.
-
-  * Note: behavior many be different if page has been used before.
+  * Note: behavior may be different if page has been used before.
   * Usage can save items to localStorage which are then loaded onto page.
   * See "Persistence" below for expected behavior for saved data.
   * Run "localStorage.clear()" in console to simulate a first page load.
@@ -84,7 +83,6 @@
   * If server cannot be reached, should display "Failed To Reach API Server".
   * Test by inserting "XYXY" into url: https://api.nutritionix.com/
   * (found at line 154 in views/app.js).
-
   * If server cannot find a match, should display "No Matching Foods Were Found".
   * Test by typing in "foobar" in search bar and hitting return.
 
@@ -97,11 +95,9 @@
 14. Known Problems.
 
   * The Saved Days do not persist upon page reload.
-  * The implementation of Saved Days is poor and needs to be redone.
-
-  * If Save This Day is used once, then "Clear All Foods", then foods
+  * That is because the implementation of Saved Days is poor and needs to be redone.
+  * If "Save This Day" is used once, then "Clear All Foods", then foods
   * are added, and then "Save This Day" is used again, all but the last
   * saved day will have no table data rows.
-
   * Upon clicking "Save This Day", the actions done by "Clear All Foods"
   * should happen automatically.  Ran into problems implementing that.
