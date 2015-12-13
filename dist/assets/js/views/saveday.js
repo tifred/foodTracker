@@ -1,1 +1,1 @@
-var app=app||{};app.FoodSavedDayView=Backbone.View.extend({tagName:"tr",events:{},initialize:function(){},render:function(){return this.$el.html("<td>"+this.model.get("name")+'</td><td class="calories-data">'+this.model.get("calories")+"</td"),this}});
+var app=app||{};app.FoodSavedDayView=Backbone.View.extend({tagName:"tr",template:_.template($("#saved-days-template").html()),events:{},initialize:function(){},render:function(){return this.$el.html(this.template(this.model.attributes)),this}});

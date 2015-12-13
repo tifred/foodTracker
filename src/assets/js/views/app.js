@@ -35,6 +35,7 @@ app.AppView = Backbone.View.extend({
     this.rangeStart = 0;
     this.rangeEnd = 3;
     this.lastSearchInput = '';
+    this.searchInput = '';
     this.useLastSearchInput = false;
 
     /*
@@ -70,7 +71,7 @@ app.AppView = Backbone.View.extend({
     this.$saveDay.hide();
     this.$clearFoods.hide();
 
-    /* 
+    /*
        Retrieve from localstorage upon load.
        Recent results are always preserved.
        Foods are preseved until the "Clear All Foods" button is clicked.
@@ -112,7 +113,7 @@ app.AppView = Backbone.View.extend({
 
   createSearchResults: function( event ) {
 
-    /* 
+    /*
         An initial search will get three items from the API's url.
         Hitting the "Show More" button will get the next three items.
         The boolean "useLastSearchInput" signifies whether this is an initial
@@ -121,7 +122,7 @@ app.AppView = Backbone.View.extend({
 
     if (self.useLastSearchInput) {
       // If the "Show More" button was used, use last input value.
-      var searchInput = self.lastSearchInput;
+      searchInput = self.lastSearchInput;
       // Otherwise, do all this:
     } else {
       // If the enter key was not hit or there is no value, do nothing.
@@ -130,7 +131,7 @@ app.AppView = Backbone.View.extend({
       }
       // Otherwise, do something with the current input:
       this.loadingResults.show(); // Show "loading" while results come back.
-      var searchInput = this.$searchbar.val().trim();
+      searchInput = this.$searchbar.val().trim();
       self.lastSearchInput = searchInput; // Save input for more searches.
       self.rangeStart = 0;
       self.rangeEnd = 3;
@@ -151,23 +152,23 @@ app.AppView = Backbone.View.extend({
         Failure messages go into the searchresults collection.
     */
 
-    var nutQuery = 'https://api.nutritionix.com/v1_1/search/' + searchInput + '?results=' + range + '&fields=item_name%2Citem_id%2Cbrand_name%2Cnf_calories%2Cnf_total_fat&appId=c6f2c498&appKey=63a855793383d6e263e27c9993661a29'
+    var nutQuery = 'https://api.nutritionix.com/v1_1/search/' + searchInput + '?results=' + range + '&fields=item_name%2Citem_id%2Cbrand_name%2Cnf_calories%2Cnf_total_fat&appId=c6f2c498&appKey=63a855793383d6e263e27c9993661a29';
 
     $.getJSON(nutQuery)
       .done(function(data) {
         // data.hits array will be empty if no matches are found.
         if ( data.hits.length === 0) {
-	  app.searchresults.create( {
-	    name: "No Matching Foods Were Found",
-	    calories: 0
-	  });
+          app.searchresults.create( {
+            name: "No Matching Foods Were Found",
+            calories: 0
+          });
         }
         for (var i = 0; i < data.hits.length; i++) {
           app.searchresults.create( {
             name: data.hits[i].fields.item_name,
             calories: Math.floor(data.hits[i].fields.nf_calories)
           });
-        };
+        }
       })
       .fail(function() {
         app.searchresults.create( {
@@ -223,7 +224,7 @@ app.AppView = Backbone.View.extend({
 
   /*
       clearSearchResults: clears results from DOM and collection.
-      Also resets some key variables.    
+      Also resets some key variables.
       This is run when an item is selected from searchresults.
   */
 
@@ -240,7 +241,7 @@ app.AppView = Backbone.View.extend({
   /*
       addRecent: Adds recent results to DOM.
       The models in this collection are created when a user
-      clicks on a search result.  
+      clicks on a search result
       It happens in the "createFoodandRecentResults" method
       in the SearchResultView constructor/view.
   */
@@ -253,7 +254,7 @@ app.AppView = Backbone.View.extend({
   /*
       addFood: Adds one new food to the table in the DOM.
       The models in this collection are created when a user
-      clicks on a search result.  
+      clicks on a search result.
       It happens in the "createFoodandRecentResults" method
       in the SearchResultView constructor/view.
   */
@@ -307,9 +308,9 @@ app.AppView = Backbone.View.extend({
       var calCount = 0;
       self.$savedDayRow.append('<div class="col-xs-12 col-sm-6 col-md-3"><div>Day ' + dayNum + '</div><table class="table table-striped table-bordered table-condensed table-hover table-day' + dayNum + '"><tbody><tr><th>Food</th><th>Calories</th></tr>');
       app.allSavedDays[i].each(function(food) {
-	calCount += food.get('calories');
-	var foodSavedDayView = new app.FoodSavedDayView({model: food});
-	$('.table-day' + dayNum + ' tbody').append(foodSavedDayView.render().el);
+        calCount += food.get('calories');
+        var foodSavedDayView = new app.FoodSavedDayView({model: food});
+        $('.table-day' + dayNum + ' tbody').append(foodSavedDayView.render().el);
       });
 
       $('.table-day' + dayNum + ' tbody').append('<tr id="table-total-row"><th>Total</th><th id="total">' + calCount + '</th></tr>');
@@ -318,15 +319,15 @@ app.AppView = Backbone.View.extend({
     }
   },
 
-  /* 
+  /*
       foodsDestroy: run by click on "Clear All Foods" button.
       Effectively removes foods from collection and from localStorage.
       Triggers a "remove" event, which will run RemoveAndAddAllFoods.
   */
-     
+
   foodsDestroy: function() {
      while (app.foods.models.length > 0) {
        app.foods.at(0).destroy();
-     }  
+     }
   }
 });

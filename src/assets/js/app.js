@@ -9,4 +9,3 @@ $(function() {
   new app.AppView();
 
 });
-
