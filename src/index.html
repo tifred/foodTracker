@@ -8,6 +8,7 @@
     <link href="http://fonts.googleapis.com/css?family=PT+Sans:400,700" rel='stylesheet'>
     <link href="assets/css/style.css" rel="stylesheet">
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/font-awesome.min.css" rel="stylesheet">
   </head>
 
   <body>
@@ -80,23 +81,24 @@
 
     <!-- template used in js/views/searchresults.js, app.SearchResultView -->
     <script type="text/template" id="search-result-template">
-      <div class="search-result-data"><%= name %></div>
+      <div class="search-result-data"><%= name + ', ' + brandName  + ', ' + calories + ' Calories' %></div>
     </script>
 
     <!-- template used in js/views/recentresults.js, app.RecentResultView -->
     <script type="text/template" id="recent-result-template">
-      <div class="recent-result-data"><%= name %></div>
+      <div class="recent-result-data"><%= name + ', ' + brandName  + ', ' + calories     + ' Calories' %></div>
     </script>
 
     <!-- template used in js/views/foods.js, app.FoodView -->
     <script type="text/template" id="food-template">
-      <td><%= name %></td>
+      <td><%= name + ', ' + brandName %></td>
       <td class="calories-data"><%= calories %></td>
+      <td><i class="fa fa-times"></i></td>
     </script>
 
     <!-- template used in js/views/saveday.js, app.FoodSavedDayView -->
     <script type="text/template" id="saved-days-template">
-      <td><%= name %></td>
+      <td><%= name + ', ' + brandName %></td>
       <td class="calories-data"><%= calories %></td>
     </script>
 

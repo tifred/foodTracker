@@ -7,7 +7,7 @@ var gulp = require('gulp'),
 
 gulp.task('buildDist', function() {
   gulp.src(["./src/**", "!./src/**/*.js", "!./src/**/*.html", "!./src/**/*.css"])
-    .pipe(gulp.dest("./dist"))
+    .pipe(gulp.dest("./dist"));
 });
 
 gulp.task('minify-html', function() {
@@ -19,7 +19,7 @@ gulp.task('minify-html', function() {
 gulp.task('minifyJS', function () {
    gulp.src('./src/**/*.js')
       .pipe(uglify())
-      .pipe(gulp.dest('./dist'))
+      .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('minifyCSS', function() {

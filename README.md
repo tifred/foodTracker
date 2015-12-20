@@ -18,6 +18,7 @@
 
   * Message of "Loading Results" should appear below search bar.
   * Three results should appear in a list below search bar.
+  * Result should include full name, brand name, and calories.
   * "Loading Results" message should disappear.
   * "Show More" button should appear.
 
@@ -36,6 +37,7 @@
   * Selected food should appear in "Recently Selected Foods" list.
   * Selected food should appear in "Foods Eaten Today" list.
   * Food should list name and calorie in the table.
+  * Food should have an "x" icon as the last column of the table.
   * Table should have a "total" line with total of all calories.
   * "Save This Day" button should appear below food table.
   * "Clear All Foods" button should appear below food table.
@@ -48,9 +50,8 @@
 7. Hover over food in food table.
 
   * Background color should change to white.
-  * Number of calories should change to the text "Remove?"
 
-8. Click on "Remove?" text.
+8. Click on "x" icon in food table.
 
   * Food should be removed from food table.
   * Total in food table should be updated.
@@ -75,7 +76,7 @@
 
   * Recently Selected Foods should persist upon page reload.
   * Foods table should persist upon page reload.
-  * Clicking on "Remove?" or "Clear All Foods" should prevent persistence.
+  * Clicking on "x" icon or "Clear All Foods" should prevent persistence.
   * Saved Days should not persist upon reload (undesireable, but expected for now).
 
 11. Error Handling.

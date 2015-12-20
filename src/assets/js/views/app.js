@@ -19,7 +19,6 @@ app.AppView = Backbone.View.extend({
   },
 
   initialize: function() {
-    self = this;
     this.$searchbar = $('#searchbar');
     this.$searchresultslist = $('#searchresultslist');
     this.$recentresultslist = $('#recentresultslist');
@@ -88,6 +87,8 @@ app.AppView = Backbone.View.extend({
         and show the "Save This Day" button.
     */
 
+    var self = this;
+
     if (app.foods.length > 0) {
       this.$saveDay.show();
       this.$clearFoods.show();
@@ -103,12 +104,14 @@ app.AppView = Backbone.View.extend({
   /***** Let the Methods Begin *****/
 
   addTotalCals: function() {
+    var self = this;
     var calCount = 0;
     app.foods.each(function(food) {
       calCount += food.get('calories');
     });
     self.$("#foodtable #table-total-row").remove();
-    self.$foodtable.append('<tr id="table-total-row"><th>Total</th><th id="total">' + calCount + '</th></tr>');
+    self.$foodtable.append('<tr id="table-total-row"><th>Total</th><th id="total">' +
+    calCount + '</th></tr>');
   },
 
   createSearchResults: function( event ) {
@@ -119,6 +122,7 @@ app.AppView = Backbone.View.extend({
         The boolean "useLastSearchInput" signifies whether this is an initial
         search or a "Show More" search.
     */
+    var self = this;
 
     if (self.useLastSearchInput) {
       // If the "Show More" button was used, use last input value.
@@ -143,6 +147,8 @@ app.AppView = Backbone.View.extend({
 
     /*
         Run API from nutritionix.
+        See https://developer.nutritionix.com/docs/v1_1
+
         This happens for both an initial search and a "Show More".
         Results will be in "data.hits[i]."
         Create new models in the searchresults collection.
@@ -160,20 +166,23 @@ app.AppView = Backbone.View.extend({
         if ( data.hits.length === 0) {
           app.searchresults.create( {
             name: "No Matching Foods Were Found",
-            calories: 0
+            calories: 0,
+            brandName: " "
           });
         }
         for (var i = 0; i < data.hits.length; i++) {
           app.searchresults.create( {
             name: data.hits[i].fields.item_name,
-            calories: Math.floor(data.hits[i].fields.nf_calories)
+            calories: Math.floor(data.hits[i].fields.nf_calories),
+            brandName: data.hits[i].fields.brand_name
           });
         }
       })
       .fail(function() {
         app.searchresults.create( {
           name: "Could Not Reach Server With Food Information",
-          calories: 0
+          calories: 0,
+          brandName: " "
         });
       });
 
@@ -195,6 +204,7 @@ app.AppView = Backbone.View.extend({
 
   addSearchResults: function() {
     // Remove all the li elements that held old search results.
+    var self = this;
     self.$("#searchresultslist li").remove();
 
     // Loop through searchresults collection and add li's to the ul.
@@ -216,6 +226,7 @@ app.AppView = Backbone.View.extend({
   */
 
   createMoreSearchResults: function() {
+    var self = this;
     self.rangeStart += 3;
     self.rangeEnd += 3;
     self.useLastSearchInput = true;
@@ -229,6 +240,7 @@ app.AppView = Backbone.View.extend({
   */
 
   clearSearchResults: function() {
+    var self = this;
     app.searchresults.reset();
     self.$("#searchresultslist li").remove();
     self.lastSearchInput = '';
@@ -247,8 +259,9 @@ app.AppView = Backbone.View.extend({
   */
 
   addRecent: function(result) {
-      var recentView = new app.RecentResultView({model: result});
-      self.$recentresultslist.append(recentView.render().el);
+    var self = this;
+    var recentView = new app.RecentResultView({model: result});
+    self.$recentresultslist.append(recentView.render().el);
   },
 
   /*
@@ -260,6 +273,7 @@ app.AppView = Backbone.View.extend({
   */
 
   addFood: function(food) {
+      var self = this;
       var foodView = new app.FoodView({model: food});
       self.$foodtable.append(foodView.render().el);
   },
@@ -271,6 +285,7 @@ app.AppView = Backbone.View.extend({
   */
 
   RemoveAndAddAllFoods: function() {
+    var self = this;
     self.$("#foodtable .table-data-food").remove();
     app.foods.each(this.addFood, this);
   },
@@ -301,12 +316,15 @@ app.AppView = Backbone.View.extend({
   */
 
   addSavedDays: function() {
+    var self = this;
     self.$savedDayRow.find('div').remove();
 
     for (var i = 0; i < app.allSavedDays.length; i++) {
       var dayNum = i + 1;
       var calCount = 0;
-      self.$savedDayRow.append('<div class="col-xs-12 col-sm-6 col-md-3"><div>Day ' + dayNum + '</div><table class="table table-striped table-bordered table-condensed table-hover table-day' + dayNum + '"><tbody><tr><th>Food</th><th>Calories</th></tr>');
+      self.$savedDayRow.append('<div class="col-xs-12 col-sm-6 col-md-3"><div>Day ' +
+      dayNum + '</div><table class="table table-striped table-bordered table-condensed table-hover table-day' +
+      dayNum + '"><tbody><tr><th>Food</th><th>Calories</th></tr>');
       app.allSavedDays[i].each(function(food) {
         calCount += food.get('calories');
         var foodSavedDayView = new app.FoodSavedDayView({model: food});

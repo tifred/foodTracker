@@ -4,7 +4,7 @@ var app = app || {};
 
 /*
     app.FoodView: generates table row for each food.
-    Also handles three user events.
+    Also handles remove event by clicking on "x" icon for a food.
 */
 
 app.FoodView = Backbone.View.extend({
@@ -15,9 +15,14 @@ app.FoodView = Backbone.View.extend({
   className: 'table-data-food',
 
   events: {
-    'mouseover .calories-data': 'showRemovePrompt',
-    'mouseleave .calories-data': 'hideRemovePrompt',
-    'click .calories-data': 'destroyFood'
+    /*
+      OLD: not in use now, but not willing to erase them yet:
+
+      'mouseover .calories-data': 'showRemovePrompt',
+      'mouseleave .calories-data': 'hideRemovePrompt',
+      'click .calories-data': 'destroyFood'
+    */
+    'click .fa-times': 'destroyFood'
   },
 
   initialize: function() {

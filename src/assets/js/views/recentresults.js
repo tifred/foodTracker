@@ -38,10 +38,12 @@ app.RecentResultView = Backbone.View.extend({
 
     var name = this.model.get("name");
     var calories = this.model.get("calories");
+    var brandName = this.model.get("brandName");
 
     app.foods.create({
       name: name,
-      calories: calories
+      calories: calories,
+      brandName: brandName
     });
   }
 });
